@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Learning Management System - Download</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center">
+    <div class="max-w-2xl w-full mx-4">
+        <div class="bg-white rounded-lg shadow-lg p-8">
+            <h1 class="text-3xl font-bold text-gray-900 mb-6">
+                Learning Management System
+            </h1>
+
+            <div class="space-y-6">
+                <!-- Individual Files -->
+                <div class="border rounded-lg p-4">
+                    <h2 class="text-xl font-semibold mb-4">Download Individual Files</h2>
+                    <div class="space-y-2">
+                        <a href="README.md" download class="block px-4 py-2 bg-blue-50 hover:bg-blue-100 rounded text-blue-600 hover:text-blue-700">
+                            README.md - Documentation and Setup Guide
+                        </a>
+                        <a href="preview.bat" download class="block px-4 py-2 bg-blue-50 hover:bg-blue-100 rounded text-blue-600 hover:text-blue-700">
+                            preview.bat - Windows Setup Script
+                        </a>
+                        <a href="preview.sh" download class="block px-4 py-2 bg-blue-50 hover:bg-blue-100 rounded text-blue-600 hover:text-blue-700">
+                            preview.sh - Linux/Mac Setup Script
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Complete Project -->
+                <div class="border rounded-lg p-4">
+                    <h2 class="text-xl font-semibold mb-4">Download Complete Project</h2>
+                    <div class="space-y-4">
+                        <p class="text-gray-600">
+                            Download the complete project as a ZIP file. This includes all source code, documentation, and setup scripts.
+                        </p>
+                        <button onclick="window.location.href='lms-project.zip'" class="w-full bg-blue-600 text-white py-3 px-6 rounded-lg hover:bg-blue-700 flex items-center justify-center space-x-2">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                            </svg>
+                            <span>Download Project (ZIP)</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Setup Instructions -->
+                <div class="border rounded-lg p-4">
+                    <h2 class="text-xl font-semibold mb-4">Quick Setup Guide</h2>
+                    <div class="space-y-2 text-gray-600">
+                        <p>1. Download and extract the ZIP file</p>
+                        <p>2. Install Node.js and MongoDB if not already installed</p>
+                        <p>3. Run the appropriate setup script:</p>
+                        <div class="bg-gray-100 p-3 rounded mt-2">
+                            <p class="font-mono text-sm">
+                                # Windows:<br>
+                                preview.bat
+                            </p>
+                            <p class="font-mono text-sm mt-2">
+                                # Linux/Mac:<br>
+                                chmod +x preview.sh<br>
+                                ./preview.sh
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Requirements -->
+                <div class="border rounded-lg p-4">
+                    <h2 class="text-xl font-semibold mb-4">System Requirements</h2>
+                    <ul class="list-disc list-inside space-y-1 text-gray-600">
+                        <li>Node.js (v14 or higher)</li>
+                        <li>MongoDB</li>
+                        <li>npm or yarn package manager</li>
+                        <li>Modern web browser</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="mt-8 pt-6 border-t text-center text-gray-500">
+                <p>For support or questions, please refer to the README.md file or raise an issue in the repository.</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
