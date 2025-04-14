@@ -1,15 +1,13 @@
 import React from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { QueryClient, QueryClientProvider } from 'react-query';
 import { AuthProvider } from './context/AuthContext';
 import { CourseProvider } from './context/CourseContext';
-import YouTubeCourseForm from './components/courses/YouTubeCourseForm';
-import UploadCourseForm from './components/courses/UploadCourseForm';
+import ProtectedRoute, { RoleProtectedRoute } from './components/auth/ProtectedRoute';
 
 // Layout Components
 import Navbar from './components/layout/Navbar';
 import Footer from './components/layout/Footer';
-import ProtectedRoute from './components/auth/ProtectedRoute';
-import LoadingSpinner from './components/common/LoadingSpinner';
 
 // Public Pages
 import Home from './pages/Home';
@@ -20,81 +18,86 @@ import CourseDetails from './pages/courses/CourseDetails';
 import NotFound from './pages/NotFound';
 
 // Protected Pages
-import StudentDashboard from './pages/dashboard/StudentDashboard';
-import InstructorDashboard from './pages/dashboard/InstructorDashboard';
+import Profile from './pages/profile/Profile';
 import CreateCourse from './pages/courses/CreateCourse';
 import EditCourse from './pages/courses/EditCourse';
-
 import LessonView from './pages/lessons/LessonView';
-import Profile from './pages/profile/Profile';
+import InstructorDashboard from './pages/dashboard/InstructorDashboard';
+import StudentDashboard from './pages/dashboard/StudentDashboard';
 
-function App() {
-  const { loading } = useAuth();
-
-  if (loading) {
-    return <LoadingSpinner />;
+// Create a client
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+      retry: 1
+    }
   }
+});
 
+const App = () => {
   return (
-    <div className="flex flex-col min-h-screen">
-      <Navbar />
-      <main className="flex-grow">
-        <Routes>
-              <Route path="/" element={<Home />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/register" element={<Register />} />
-              <Route path="/courses" element={<CourseList />} />
-              <Route path="/courses/:id" element={<CourseDetails />} />
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <CourseProvider>
+          <Router>
+            <div className="flex flex-col min-h-screen">
+              <Navbar />
+              <main className="flex-grow bg-gray-50">
+                <Routes>
+                  {/* Public Routes */}
+                  <Route path="/" element={<Home />} />
+                  <Route path="/login" element={<Login />} />
+                  <Route path="/register" element={<Register />} />
+                  <Route path="/courses" element={<CourseList />} />
+                  <Route path="/courses/:id" element={<CourseDetails />} />
 
-              <Route
-                path="/dashboard/student"
-                element={
-                  <ProtectedRoute allowedRoles={['student']}>
-                    <StudentDashboard />
-                  </ProtectedRoute>
-                }
-              />
+                  {/* Protected Routes */}
+                  <Route element={<ProtectedRoute />}>
+                    <Route path="/profile" element={<Profile />} />
+                    <Route
+                      path="/courses/:courseId/lessons/:lessonId"
+                      element={<LessonView />}
+                    />
+                  </Route>
 
-              <Route
-                path="/dashboard/instructor"
-                element={
-                  <ProtectedRoute allowedRoles={['instructor']}>
-                    <InstructorDashboard />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/courses/create"
-                element={
-                  <ProtectedRoute allowedRoles={['instructor']}>
-                    <UploadCourseForm />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/courses/youtube/create"
-                element={
-                  <ProtectedRoute allowedRoles={['instructor']}>
-                    <YouTubeCourseForm />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/courses/edit/:id"
-                element={
-                  <ProtectedRoute allowedRoles={['instructor']}>
-                    <EditCourse />
-                  </ProtectedRoute>
-                }
-              />
+                  {/* Instructor Routes */}
+                  <Route
+                    element={
+                      <RoleProtectedRoute allowedRoles={['instructor', 'admin']} />
+                    }
+                  >
+                    <Route path="/courses/create" element={<CreateCourse />} />
+                    <Route path="/courses/:id/edit" element={<EditCourse />} />
+                    <Route
+                      path="/dashboard/instructor"
+                      element={<InstructorDashboard />}
+                    />
+                  </Route>
 
-              <Route path="*" element={<NotFound />} />
+                  {/* Student Routes */}
+                  <Route
+                    element={
+                      <RoleProtectedRoute allowedRoles={['student', 'admin']} />
+                    }
+                  >
+                    <Route
+                      path="/dashboard/student"
+                      element={<StudentDashboard />}
+                    />
+                  </Route>
 
-        </Routes>
-      </main>
-      <Footer />
-    </div>
+                  {/* 404 Route */}
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+              </main>
+              <Footer />
+            </div>
+          </Router>
+        </CourseProvider>
+      </AuthProvider>
+    </QueryClientProvider>
   );
-}
+};
 
 export default App;
