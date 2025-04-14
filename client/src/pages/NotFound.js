@@ -1,132 +1,313 @@
-import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useCourse } from '../hooks/useCourse';
+import { toast } from 'react-hot-toast';
+
+const QUICK_LINKS = [
+  {
+    icon: 'book-open',
+    title: 'Learning Resources',
+    description: 'Access our library of tutorials and guides',
+    link: '/resources',
+    color: 'blue'
+  },
+  {
+    icon: 'question-circle',
+    title: 'FAQ',
+    description: 'Find answers to common questions',
+    link: '/faq',
+    color: 'green'
+  },
+  {
+    icon: 'headset',
+    title: '24/7 Support',
+    description: 'Get help from our support team',
+    link: '/support',
+    color: 'purple'
+  }
+];
+
+const HELP_LINKS = [
+  { to: '/courses', text: 'Browse Courses', icon: 'graduation-cap' },
+  { to: '/help', text: 'Help Center', icon: 'life-ring' },
+  { to: '/contact', text: 'Contact Support', icon: 'envelope' },
+  { to: '/sitemap', text: 'Sitemap', icon: 'sitemap' }
+];
 
 const NotFound = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const { searchCourses } = useCourse();
+  
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+
+  // Log 404 errors for monitoring
+  useEffect(() => {
+    console.error('404 Error:', {
+      path: location.pathname,
+      timestamp: new Date().toISOString(),
+      referrer: document.referrer
+    });
+  }, [location]);
+
+  // Handle search
+  const handleSearch = async (e) => {
+    e.preventDefault();
+    if (!searchQuery.trim()) return;
+
+    try {
+      setIsSearching(true);
+      const results = await searchCourses({ query: searchQuery });
+      setSearchResults(results.slice(0, 3)); // Show top 3 results
+      setShowSuggestions(true);
+
+      if (results.length === 0) {
+        toast.error('No results found. Try different keywords.');
+      }
+    } catch (error) {
+      console.error('Search error:', error);
+      toast.error('Failed to search. Please try again.');
+    } finally {
+      setIsSearching(false);
+    }
+  };
 
   return (
-    <div className="min-h-[calc(100vh-200px)] flex items-center justify-center px-4 sm:px-6 lg:px-8">
-      <div className="text-center">
-        {/* 404 Illustration */}
-        <div className="mb-8">
-          <svg
-            className="mx-auto h-40 w-40 text-blue-600"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            aria-hidden="true"
+    <motion.main
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="min-h-[calc(100vh-200px)] flex items-center justify-center px-4 sm:px-6 lg:px-8 py-16 bg-gradient-to-b from-gray-50 to-white"
+    >
+      <div className="text-center max-w-4xl w-full">
+        {/* 404 Animation */}
+        <motion.div
+          initial={{ scale: 0.5, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ duration: 0.5 }}
+          className="mb-8 relative"
+        >
+          <div className="absolute inset-0 bg-blue-100 rounded-full blur-2xl opacity-20"></div>
+          <motion.div
+            animate={{
+              rotate: [0, 10, -10, 0],
+              scale: [1, 1.1, 0.9, 1]
+            }}
+            transition={{
+              duration: 4,
+              repeat: Infinity,
+              ease: "easeInOut"
+            }}
+            className="relative"
           >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-            />
-          </svg>
-        </div>
+            <svg
+              className="mx-auto h-48 w-48 text-blue-600"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+          </motion.div>
+        </motion.div>
 
         {/* Error Message */}
-        <div className="mb-8">
-          <h1 className="text-6xl font-bold text-blue-600 mb-4">404</h1>
-          <h2 className="text-3xl font-bold text-gray-900 mb-2">
+        <motion.div
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.2 }}
+          className="mb-12"
+        >
+          <h1 className="text-8xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 mb-4">
+            404
+          </h1>
+          <h2 className="text-4xl font-bold text-gray-900 mb-4">
             Page Not Found
           </h2>
-          <p className="text-gray-600 text-lg">
-            Oops! The page you're looking for doesn't exist.
+          <p className="text-xl text-gray-600">
+            Oops! The page you're looking for seems to have wandered off.
           </p>
-        </div>
+        </motion.div>
 
         {/* Action Buttons */}
-        <div className="flex flex-col sm:flex-row justify-center gap-4">
-          <button
+        <motion.div
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.3 }}
+          className="flex flex-col sm:flex-row justify-center gap-4 mb-12"
+        >
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
             onClick={() => navigate(-1)}
-            className="btn-secondary"
+            className="btn btn-secondary"
           >
             <i className="fas fa-arrow-left mr-2"></i>
             Go Back
-          </button>
-          <Link to="/" className="btn-primary">
-            <i className="fas fa-home mr-2"></i>
-            Return Home
-          </Link>
-        </div>
+          </motion.button>
+          <motion.div
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            <Link to="/" className="btn btn-primary">
+              <i className="fas fa-home mr-2"></i>
+              Return Home
+            </Link>
+          </motion.div>
+        </motion.div>
 
-        {/* Help Links */}
-        <div className="mt-8 space-y-2 text-sm text-gray-500">
-          <p>Here are some helpful links:</p>
-          <div className="flex justify-center space-x-4">
-            <Link
-              to="/courses"
-              className="text-blue-600 hover:text-blue-800 hover:underline"
-            >
-              Browse Courses
-            </Link>
-            <span>•</span>
-            <Link
-              to="/help"
-              className="text-blue-600 hover:text-blue-800 hover:underline"
-            >
-              Help Center
-            </Link>
-            <span>•</span>
-            <Link
-              to="/contact"
-              className="text-blue-600 hover:text-blue-800 hover:underline"
-            >
-              Contact Support
-            </Link>
-          </div>
-        </div>
-
-        {/* Search Box */}
-        <div className="mt-8 max-w-md mx-auto">
-          <div className="relative">
+        {/* Search Section */}
+        <motion.div
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.4 }}
+          className="max-w-2xl mx-auto mb-16"
+        >
+          <h3 className="text-xl font-semibold mb-6">
+            Looking for something specific?
+          </h3>
+          <form onSubmit={handleSearch} className="relative">
             <input
               type="text"
-              placeholder="Search for courses, topics, or resources..."
-              className="form-input pr-10 w-full"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search courses, topics, or resources..."
+              className="form-input pl-12 pr-12 py-4 w-full rounded-full border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-lg"
             />
-            <button
+            <i className="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-lg"></i>
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
               type="submit"
-              className="absolute inset-y-0 right-0 px-3 flex items-center"
+              className="absolute right-2 top-1/2 -translate-y-1/2 btn btn-primary rounded-full py-2"
+              disabled={isSearching}
             >
-              <i className="fas fa-search text-gray-400"></i>
-            </button>
-          </div>
-        </div>
+              {isSearching ? (
+                <i className="fas fa-spinner fa-spin"></i>
+              ) : (
+                'Search'
+              )}
+            </motion.button>
+          </form>
 
-        {/* Additional Resources */}
-        <div className="mt-12 grid grid-cols-1 sm:grid-cols-3 gap-6 max-w-3xl mx-auto">
-          <div className="p-4 bg-white rounded-lg shadow-sm">
-            <div className="text-blue-600 mb-2">
-              <i className="fas fa-book-open text-2xl"></i>
+          {/* Search Results */}
+          <AnimatePresence>
+            {showSuggestions && searchResults.length > 0 && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                className="mt-4 bg-white rounded-2xl shadow-lg p-6"
+              >
+                <h4 className="font-semibold mb-4">Suggested Content:</h4>
+                <div className="space-y-4">
+                  {searchResults.map((result) => (
+                    <motion.div
+                      key={result.id}
+                      whileHover={{ x: 10 }}
+                      className="group"
+                    >
+                      <Link
+                        to={`/courses/${result.id}`}
+                        className="block p-4 hover:bg-blue-50 rounded-xl transition-all"
+                      >
+                        <div className="flex items-center">
+                          <img
+                            src={result.thumbnail || 'https://via.placeholder.com/40'}
+                            alt=""
+                            className="w-10 h-10 rounded-lg object-cover mr-4"
+                          />
+                          <div className="flex-1">
+                            <h5 className="font-medium text-gray-900 group-hover:text-blue-600 transition-colors">
+                              {result.title}
+                            </h5>
+                            <p className="text-sm text-gray-500 line-clamp-1">
+                              {result.description}
+                            </p>
+                          </div>
+                          <i className="fas fa-arrow-right text-blue-500 opacity-0 group-hover:opacity-100 transition-opacity"></i>
+                        </div>
+                      </Link>
+                    </motion.div>
+                  ))}
+                  <Link
+                    to={`/courses?q=${encodeURIComponent(searchQuery)}`}
+                    className="block text-center text-blue-600 hover:text-blue-800 font-medium pt-4 border-t"
+                  >
+                    View all results →
+                  </Link>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </motion.div>
+
+        {/* Quick Links */}
+        <motion.div
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.5 }}
+          className="grid grid-cols-1 sm:grid-cols-3 gap-6 max-w-3xl mx-auto mb-16"
+        >
+          {QUICK_LINKS.map((item, index) => (
+            <motion.div
+              key={item.title}
+              whileHover={{ y: -5 }}
+              transition={{ delay: index * 0.1 }}
+            >
+              <Link
+                to={item.link}
+                className="block p-6 bg-white rounded-2xl shadow-sm hover:shadow-md transition-all group"
+              >
+                <div className={`text-${item.color}-500 mb-4 group-hover:scale-110 transition-transform`}>
+                  <i className={`fas fa-${item.icon} text-3xl`}></i>
+                </div>
+                <h3 className="text-lg font-semibold mb-2">{item.title}</h3>
+                <p className="text-gray-600">{item.description}</p>
+              </Link>
+            </motion.div>
+          ))}
+        </motion.div>
+
+        {/* Help Links */}
+        <motion.nav
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.6 }}
+          className="border-t border-gray-200 pt-8"
+        >
+          <div className="text-sm text-gray-500">
+            <p className="mb-6 text-base">Additional Resources:</p>
+            <div className="flex flex-wrap justify-center gap-6">
+              {HELP_LINKS.map((link) => (
+                <motion.div
+                  key={link.to}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <Link
+                    to={link.to}
+                    className="flex items-center text-gray-600 hover:text-blue-600 transition-colors"
+                  >
+                    <i className={`fas fa-${link.icon} mr-2`}></i>
+                    {link.text}
+                  </Link>
+                </motion.div>
+              ))}
             </div>
-            <h3 className="font-semibold mb-1">Learning Resources</h3>
-            <p className="text-sm text-gray-600">
-              Access our library of tutorials and guides
-            </p>
           </div>
-          <div className="p-4 bg-white rounded-lg shadow-sm">
-            <div className="text-blue-600 mb-2">
-              <i className="fas fa-question-circle text-2xl"></i>
-            </div>
-            <h3 className="font-semibold mb-1">FAQ</h3>
-            <p className="text-sm text-gray-600">
-              Find answers to common questions
-            </p>
-          </div>
-          <div className="p-4 bg-white rounded-lg shadow-sm">
-            <div className="text-blue-600 mb-2">
-              <i className="fas fa-headset text-2xl"></i>
-            </div>
-            <h3 className="font-semibold mb-1">Support</h3>
-            <p className="text-sm text-gray-600">
-              Get help from our support team
-            </p>
-          </div>
-        </div>
+        </motion.nav>
       </div>
-    </div>
+    </motion.main>
   );
 };
 
