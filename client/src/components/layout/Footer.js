@@ -2,59 +2,52 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 
 const Footer = () => {
-  const currentYear = new Date().getFullYear();
-
   return (
     <footer className="bg-gray-900 text-white">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div className="container mx-auto px-4 py-12">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-          {/* Brand Section */}
-          <div className="col-span-1 md:col-span-2">
-            <Link to="/" className="text-2xl font-bold text-blue-400">
-              EduLearn
-            </Link>
-            <p className="mt-4 text-gray-400">
-              Empowering learners worldwide with quality online education.
-              Join our community of students and instructors to enhance your skills
-              and knowledge.
+          {/* Company Info */}
+          <div>
+            <div className="flex items-center space-x-3 mb-6">
+              <i className="fas fa-graduation-cap text-2xl text-blue-500"></i>
+              <span className="text-xl font-bold">EduPlatform</span>
+            </div>
+            <p className="text-gray-400 mb-6">
+              Empowering learners worldwide with quality education and
+              professional development opportunities.
             </p>
-            <div className="mt-6 flex space-x-4">
-              {/* Social Media Links */}
-              <a
-                href="https://twitter.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-gray-400 hover:text-blue-400 transition-colors"
-              >
-                <span className="sr-only">Twitter</span>
-                <i className="fab fa-twitter text-xl"></i>
-              </a>
+            <div className="flex space-x-4">
               <a
                 href="https://facebook.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-gray-400 hover:text-blue-400 transition-colors"
+                className="text-gray-400 hover:text-white transition-colors"
               >
-                <span className="sr-only">Facebook</span>
-                <i className="fab fa-facebook text-xl"></i>
+                <i className="fab fa-facebook-f"></i>
+              </a>
+              <a
+                href="https://twitter.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-gray-400 hover:text-white transition-colors"
+              >
+                <i className="fab fa-twitter"></i>
               </a>
               <a
                 href="https://linkedin.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-gray-400 hover:text-blue-400 transition-colors"
+                className="text-gray-400 hover:text-white transition-colors"
               >
-                <span className="sr-only">LinkedIn</span>
-                <i className="fab fa-linkedin text-xl"></i>
+                <i className="fab fa-linkedin-in"></i>
               </a>
               <a
-                href="https://github.com"
+                href="https://instagram.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-gray-400 hover:text-blue-400 transition-colors"
+                className="text-gray-400 hover:text-white transition-colors"
               >
-                <span className="sr-only">GitHub</span>
-                <i className="fab fa-github text-xl"></i>
+                <i className="fab fa-instagram"></i>
               </a>
             </div>
           </div>
@@ -66,23 +59,15 @@ const Footer = () => {
               <li>
                 <Link
                   to="/courses"
-                  className="text-gray-400 hover:text-blue-400 transition-colors"
+                  className="text-gray-400 hover:text-white transition-colors"
                 >
                   Browse Courses
                 </Link>
               </li>
               <li>
                 <Link
-                  to="/register"
-                  className="text-gray-400 hover:text-blue-400 transition-colors"
-                >
-                  Become an Instructor
-                </Link>
-              </li>
-              <li>
-                <Link
                   to="/about"
-                  className="text-gray-400 hover:text-blue-400 transition-colors"
+                  className="text-gray-400 hover:text-white transition-colors"
                 >
                   About Us
                 </Link>
@@ -90,112 +75,136 @@ const Footer = () => {
               <li>
                 <Link
                   to="/contact"
-                  className="text-gray-400 hover:text-blue-400 transition-colors"
+                  className="text-gray-400 hover:text-white transition-colors"
                 >
                   Contact Us
                 </Link>
               </li>
+              <li>
+                <Link
+                  to="/blog"
+                  className="text-gray-400 hover:text-white transition-colors"
+                >
+                  Blog
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/careers"
+                  className="text-gray-400 hover:text-white transition-colors"
+                >
+                  Careers
+                </Link>
+              </li>
             </ul>
           </div>
 
-          {/* Support */}
+          {/* Categories */}
           <div>
-            <h3 className="text-lg font-semibold mb-4">Support</h3>
+            <h3 className="text-lg font-semibold mb-4">Categories</h3>
             <ul className="space-y-2">
               <li>
                 <Link
-                  to="/help"
-                  className="text-gray-400 hover:text-blue-400 transition-colors"
+                  to="/courses?category=programming"
+                  className="text-gray-400 hover:text-white transition-colors"
                 >
-                  Help Center
+                  Programming
                 </Link>
               </li>
               <li>
                 <Link
-                  to="/faq"
-                  className="text-gray-400 hover:text-blue-400 transition-colors"
+                  to="/courses?category=design"
+                  className="text-gray-400 hover:text-white transition-colors"
                 >
-                  FAQs
+                  Design
                 </Link>
               </li>
               <li>
                 <Link
-                  to="/privacy"
-                  className="text-gray-400 hover:text-blue-400 transition-colors"
+                  to="/courses?category=business"
+                  className="text-gray-400 hover:text-white transition-colors"
                 >
-                  Privacy Policy
+                  Business
                 </Link>
               </li>
               <li>
                 <Link
-                  to="/terms"
-                  className="text-gray-400 hover:text-blue-400 transition-colors"
+                  to="/courses?category=marketing"
+                  className="text-gray-400 hover:text-white transition-colors"
                 >
-                  Terms of Service
+                  Marketing
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/courses?category=photography"
+                  className="text-gray-400 hover:text-white transition-colors"
+                >
+                  Photography
                 </Link>
               </li>
             </ul>
           </div>
-        </div>
 
-        {/* Newsletter Subscription */}
-        <div className="mt-12 border-t border-gray-800 pt-8">
-          <div className="max-w-md">
-            <h3 className="text-lg font-semibold mb-4">
-              Subscribe to Our Newsletter
-            </h3>
-            <p className="text-gray-400 mb-4">
-              Get the latest updates on new courses and features
-            </p>
-            <form className="flex gap-2">
-              <input
-                type="email"
-                placeholder="Enter your email"
-                className="flex-1 px-4 py-2 rounded-md bg-gray-800 text-white border border-gray-700 focus:outline-none focus:border-blue-500"
-              />
-              <button
-                type="submit"
-                className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
-              >
-                Subscribe
-              </button>
-            </form>
+          {/* Contact Info */}
+          <div>
+            <h3 className="text-lg font-semibold mb-4">Contact Info</h3>
+            <ul className="space-y-4">
+              <li className="flex items-start">
+                <i className="fas fa-map-marker-alt mt-1.5 mr-3 text-blue-500"></i>
+                <span className="text-gray-400">
+                  123 Learning Street
+                  <br />
+                  Education City, ED 12345
+                </span>
+              </li>
+              <li className="flex items-center">
+                <i className="fas fa-phone mr-3 text-blue-500"></i>
+                <a
+                  href="tel:+1234567890"
+                  className="text-gray-400 hover:text-white transition-colors"
+                >
+                  +1 (234) 567-890
+                </a>
+              </li>
+              <li className="flex items-center">
+                <i className="fas fa-envelope mr-3 text-blue-500"></i>
+                <a
+                  href="mailto:info@eduplatform.com"
+                  className="text-gray-400 hover:text-white transition-colors"
+                >
+                  info@eduplatform.com
+                </a>
+              </li>
+            </ul>
           </div>
         </div>
 
         {/* Bottom Bar */}
-        <div className="mt-12 border-t border-gray-800 pt-8">
+        <div className="border-t border-gray-800 mt-12 pt-8">
           <div className="flex flex-col md:flex-row justify-between items-center">
-            <p className="text-gray-400 text-sm">
-              © {currentYear} EduLearn. All rights reserved.
+            <p className="text-gray-400 text-sm mb-4 md:mb-0">
+              © {new Date().getFullYear()} EduPlatform. All rights reserved.
             </p>
-            <div className="mt-4 md:mt-0">
-              <ul className="flex space-x-4 text-sm">
-                <li>
-                  <Link
-                    to="/privacy"
-                    className="text-gray-400 hover:text-blue-400 transition-colors"
-                  >
-                    Privacy
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    to="/terms"
-                    className="text-gray-400 hover:text-blue-400 transition-colors"
-                  >
-                    Terms
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    to="/cookies"
-                    className="text-gray-400 hover:text-blue-400 transition-colors"
-                  >
-                    Cookies
-                  </Link>
-                </li>
-              </ul>
+            <div className="flex space-x-6">
+              <Link
+                to="/privacy"
+                className="text-gray-400 hover:text-white text-sm transition-colors"
+              >
+                Privacy Policy
+              </Link>
+              <Link
+                to="/terms"
+                className="text-gray-400 hover:text-white text-sm transition-colors"
+              >
+                Terms of Service
+              </Link>
+              <Link
+                to="/cookies"
+                className="text-gray-400 hover:text-white text-sm transition-colors"
+              >
+                Cookie Policy
+              </Link>
             </div>
           </div>
         </div>
