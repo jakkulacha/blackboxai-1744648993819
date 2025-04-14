@@ -1,167 +1,259 @@
-import React, { createContext, useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import toast from 'react-hot-toast';
-import api from '../services/api';
+import React, { createContext, useState, useEffect, useCallback } from 'react';
+import { toast } from 'react-hot-toast';
+import { authAPI } from '../services/api';
+import { PageLoader } from '../components/common/LoadingSpinner';
 
 export const AuthContext = createContext();
 
+const TOKEN_KEY = 'token';
+const USER_KEY = 'user';
+const TOKEN_EXPIRY_KEY = 'tokenExpiry';
+
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  const [token, setToken] = useState(localStorage.getItem('token'));
   const [loading, setLoading] = useState(true);
-  const navigate = useNavigate();
+  const [initialized, setInitialized] = useState(false);
+  const [error, setError] = useState(null);
+
+  // Token management
+  const setToken = useCallback((token, expiresIn = 86400) => {
+    localStorage.setItem(TOKEN_KEY, token);
+    const expiryTime = new Date().getTime() + expiresIn * 1000;
+    localStorage.setItem(TOKEN_EXPIRY_KEY, expiryTime.toString());
+  }, []);
+
+  const clearToken = useCallback(() => {
+    localStorage.removeItem(TOKEN_KEY);
+    localStorage.removeItem(TOKEN_EXPIRY_KEY);
+    localStorage.removeItem(USER_KEY);
+  }, []);
+
+  const isTokenValid = useCallback(() => {
+    const expiry = localStorage.getItem(TOKEN_EXPIRY_KEY);
+    if (!expiry) return false;
+    return new Date().getTime() < parseInt(expiry);
+  }, []);
+
+  // Persist user data
+  const persistUser = useCallback((userData) => {
+    localStorage.setItem(USER_KEY, JSON.stringify(userData));
+    setUser(userData);
+  }, []);
 
   // Initialize auth state
   useEffect(() => {
     const initializeAuth = async () => {
-      if (token) {
-        try {
-          const response = await api.get('/auth/me');
-          setUser(response.data.data);
-          api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-        } catch (error) {
-          console.error('Auth initialization error:', error);
-          logout();
+      try {
+        setLoading(true);
+        setError(null);
+
+        // Check for token and its validity
+        const token = localStorage.getItem(TOKEN_KEY);
+        if (token && isTokenValid()) {
+          // Try to get user data from localStorage first
+          const cachedUser = localStorage.getItem(USER_KEY);
+          if (cachedUser) {
+            setUser(JSON.parse(cachedUser));
+          }
+
+          // Then verify with server
+          try {
+            const response = await authAPI.getProfile();
+            persistUser(response.data.data);
+          } catch (error) {
+            console.error('Failed to verify token:', error);
+            clearToken();
+            setUser(null);
+          }
+        } else {
+          clearToken();
+          setUser(null);
         }
+      } catch (error) {
+        console.error('Auth initialization error:', error);
+        setError(error);
+      } finally {
+        setLoading(false);
+        setInitialized(true);
       }
-      setLoading(false);
     };
 
     initializeAuth();
-  }, [token]);
+  }, [clearToken, isTokenValid, persistUser]);
 
-  // Register user
-  const register = async (userData) => {
-    try {
-      const response = await api.post('/auth/register', userData);
-      toast.success('Registration successful! Please check your email for verification.');
-      navigate('/login');
-      return response.data;
-    } catch (error) {
-      const message = error.response?.data?.error || 'Registration failed';
-      toast.error(message);
-      throw error;
-    }
-  };
+  // Auto logout when token expires
+  useEffect(() => {
+    if (!user) return;
 
-  // Login user
+    const checkTokenExpiry = () => {
+      if (!isTokenValid()) {
+        logout();
+        toast.error('Session expired. Please login again.');
+      }
+    };
+
+    const interval = setInterval(checkTokenExpiry, 60000); // Check every minute
+    return () => clearInterval(interval);
+  }, [user, isTokenValid]);
+
+  // Auth methods
   const login = async (credentials) => {
     try {
-      const response = await api.post('/auth/login', credentials);
-      const { token, user } = response.data;
-      
-      setToken(token);
-      setUser(user);
-      localStorage.setItem('token', token);
-      api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-      
-      toast.success('Login successful!');
-      navigate(user.role === 'student' ? '/dashboard/student' : '/dashboard/instructor');
-      
-      return response.data;
+      setLoading(true);
+      setError(null);
+      const response = await authAPI.login(credentials);
+      const { token, user: userData, expiresIn } = response.data.data;
+      setToken(token, expiresIn);
+      persistUser(userData);
+      return userData;
     } catch (error) {
-      const message = error.response?.data?.error || 'Login failed';
-      toast.error(message);
+      setError(error);
       throw error;
+    } finally {
+      setLoading(false);
     }
   };
 
-  // Logout user
-  const logout = () => {
-    setUser(null);
-    setToken(null);
-    localStorage.removeItem('token');
-    delete api.defaults.headers.common['Authorization'];
-    toast.success('Logged out successfully');
-    navigate('/');
+  const register = async (userData) => {
+    try {
+      setLoading(true);
+      setError(null);
+      const response = await authAPI.register(userData);
+      return response.data.data;
+    } catch (error) {
+      setError(error);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
   };
 
-  // Update user profile
-  const updateProfile = async (userData) => {
+  const logout = async (options = { silent: false }) => {
     try {
-      const response = await api.put('/auth/updatedetails', userData);
-      setUser(response.data.data);
+      setLoading(true);
+      if (!options.silent) {
+        await authAPI.logout();
+      }
+    } catch (error) {
+      console.error('Logout error:', error);
+    } finally {
+      clearToken();
+      setUser(null);
+      setLoading(false);
+    }
+  };
+
+  const updateProfile = async (data) => {
+    try {
+      setLoading(true);
+      setError(null);
+      const response = await authAPI.updateProfile(data);
+      persistUser(response.data.data);
       toast.success('Profile updated successfully');
-      return response.data;
+      return response.data.data;
     } catch (error) {
-      const message = error.response?.data?.error || 'Profile update failed';
-      toast.error(message);
+      setError(error);
       throw error;
+    } finally {
+      setLoading(false);
     }
   };
 
-  // Change password
-  const changePassword = async (passwordData) => {
+  const changePassword = async (data) => {
     try {
-      await api.put('/auth/updatepassword', passwordData);
+      setLoading(true);
+      setError(null);
+      await authAPI.changePassword(data);
       toast.success('Password changed successfully');
     } catch (error) {
-      const message = error.response?.data?.error || 'Password change failed';
-      toast.error(message);
+      setError(error);
       throw error;
+    } finally {
+      setLoading(false);
     }
   };
 
-  // Request password reset
   const forgotPassword = async (email) => {
     try {
-      await api.post('/auth/forgot-password', { email });
-      toast.success('Password reset email sent');
+      setLoading(true);
+      setError(null);
+      await authAPI.forgotPassword(email);
+      toast.success('Password reset instructions sent to your email');
     } catch (error) {
-      const message = error.response?.data?.error || 'Failed to send reset email';
-      toast.error(message);
+      setError(error);
       throw error;
+    } finally {
+      setLoading(false);
     }
   };
 
-  // Reset password
-  const resetPassword = async (token, password) => {
+  const resetPassword = async (token, data) => {
     try {
-      await api.put(`/auth/reset-password/${token}`, { password });
-      toast.success('Password reset successful');
-      navigate('/login');
+      setLoading(true);
+      setError(null);
+      await authAPI.resetPassword(token, data);
+      toast.success('Password reset successful. Please login with your new password.');
     } catch (error) {
-      const message = error.response?.data?.error || 'Password reset failed';
-      toast.error(message);
+      setError(error);
       throw error;
+    } finally {
+      setLoading(false);
     }
   };
 
-  // Verify email
   const verifyEmail = async (token) => {
     try {
-      await api.get(`/auth/verify-email/${token}`);
+      setLoading(true);
+      setError(null);
+      await authAPI.verifyEmail(token);
       toast.success('Email verified successfully');
-      navigate('/login');
     } catch (error) {
-      const message = error.response?.data?.error || 'Email verification failed';
-      toast.error(message);
+      setError(error);
       throw error;
+    } finally {
+      setLoading(false);
     }
   };
 
-  // Check if user is authenticated
-  const isAuthenticated = () => !!token && !!user;
-
-  // Check if user has required role
-  const hasRole = (requiredRole) => {
+  // Role and permission checks
+  const hasRole = useCallback((requiredRole) => {
     return user?.role === requiredRole;
-  };
+  }, [user]);
+
+  const hasPermission = useCallback((requiredPermission) => {
+    return user?.permissions?.includes(requiredPermission);
+  }, [user]);
+
+  const hasAnyRole = useCallback((roles) => {
+    return roles.some(role => user?.role === role);
+  }, [user]);
+
+  const isAuthenticated = !!user;
 
   const value = {
     user,
     loading,
+    initialized,
+    error,
     isAuthenticated,
-    hasRole,
-    register,
     login,
+    register,
     logout,
     updateProfile,
     changePassword,
     forgotPassword,
     resetPassword,
-    verifyEmail
+    verifyEmail,
+    hasRole,
+    hasPermission,
+    hasAnyRole,
+    setError
   };
+
+  // Don't render children until auth is initialized
+  if (!initialized) {
+    return <PageLoader text="Initializing application..." />;
+  }
 
   return (
     <AuthContext.Provider value={value}>
@@ -170,4 +262,4 @@ export const AuthProvider = ({ children }) => {
   );
 };
 
-export default AuthContext;
+export default AuthProvider;
