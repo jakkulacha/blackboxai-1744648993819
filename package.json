@@ -1,0 +1,13 @@
+{
+  "name": "lms-download",
+  "version": "1.0.0",
+  "description": "Download server for LMS project",
+  "main": "serve-download.js",
+  "scripts": {
+    "start": "node serve-download.js"
+  },
+  "dependencies": {
+    "express": "^4.17.1",
+    "archiver": "^5.3.0"
+  }
+}
